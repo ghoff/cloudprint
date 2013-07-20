@@ -38,6 +38,9 @@ class CloudPrintProxy(object):
         self.username = None
         self.password = None
 
+    def get_authh(self):
+        return 'GoogleLogin auth=%s' % self.get_auth()
+
     def get_auth(self):
         if self.auth:
             return self.auth
@@ -126,8 +129,8 @@ class CloudPrintProxy(object):
                     return r
                 return f
 
-        auth = self.get_auth()
-        return check_new_auth(rest.REST('https://www.google.com', auth=auth, debug=False))
+        authh = self.get_authh()
+        return check_new_auth(rest.REST('https://www.google.com', authh=authh, debug=False))
 
     def get_printers(self):
         r = self.get_rest()
@@ -310,7 +313,7 @@ def sync_printers(cups_connection, cpp):
 def process_job(cups_connection, cpp, printer, job):
     request = urllib2.Request(job['fileUrl'], headers={
         'X-CloudPrint-Proxy' : 'ArmoooIsAnOEM',
-        'Authorization' : 'GoogleLogin auth=%s' % cpp.get_auth()
+        'Authorization' : cpp.get_authh()
     })
 
     try:
@@ -321,7 +324,7 @@ def process_job(cups_connection, cpp, printer, job):
 
         request = urllib2.Request(job['ticketUrl'], headers={
             'X-CloudPrint-Proxy' : 'ArmoooIsAnOEM',
-            'Authorization' : 'GoogleLogin auth=%s' % cpp.get_auth()
+            'Authorization' : cpp.get_authh()
         })
         options = json.loads(urllib2.urlopen(request).read())
         if 'request' in options: del options['request']

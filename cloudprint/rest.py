@@ -39,7 +39,7 @@ class REST:
         type(u'') : UserString.UserString,
     }
 
-    def __init__(self, host, auth=None, debug=False):
+    def __init__(self, host, authh=None, debug=False):
         proto, host = host.split('://')
         if proto == 'https':
             self._conn = httplib.HTTPSConnection(host)
@@ -51,7 +51,7 @@ class REST:
         else:
             self._conn.set_debuglevel(0)
 
-        self.auth = auth
+        self.authh = authh
 
     def rest_call(self, verb, path, data, content_type, headers={}, response_type=None):
 
@@ -59,8 +59,8 @@ class REST:
 
         headers['Content-Type'] = content_type + '; charset=UTF-8'
         headers['Accept-Charset'] = 'UTF-8'
-        if self.auth:
-            headers['Authorization'] = 'GoogleLogin auth=%s' % self.auth
+        if self.authh:
+            headers['Authorization'] = self.authh
 
         self._conn.request(verb, path, data, headers)
 
