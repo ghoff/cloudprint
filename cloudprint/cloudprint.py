@@ -37,10 +37,18 @@ class CloudPrintProxy(object):
         self.xmpp_auth_path = os.path.expanduser('~/.cloudprintauth.sasl')
         self.username = None
         self.password = None
+	self.xmpp_jid = None
 
     def get_authh(self):
         #return 'GoogleLogin auth=%s' % self.get_auth()
         return 'OAuth %s' % self.get_auth()
+
+    def get_sasl_auth(self):
+        oauth_token = self.get_auth()
+        if not self.xmpp_jid:
+		self.xmpp_jid = self.get_saved_sasl()
+        sasl_token = ('\0%s\0%s' % (self.xmpp_jid, oauth_token)).encode('base64')
+        return sasl_token
 
     def get_auth(self):
         if self.auth:
@@ -96,6 +104,13 @@ class CloudPrintProxy(object):
             self.auth = auth_file.read()
             auth_file.close()
             return self.auth
+
+    def get_saved_sasl(self):
+        if os.path.exists(self.xmpp_auth_path):
+            auth_file = open(self.xmpp_auth_path)
+            self.xmpp_jid = auth_file.read()
+            auth_file.close()
+            return self.xmpp_jid
 
     def del_saved_auth(self):
         if os.path.exists(self.auth_path):
@@ -347,7 +362,7 @@ def process_jobs(cups_connection, cpp, printers):
             for printer in printers:
                 for job in printer.get_jobs():
                     process_job(cups_connection, cpp, printer, job)
-            wait_for_new_job(file(cpp.xmpp_auth_path).read())
+            wait_for_new_job(cpp.get_sasl_auth())
         except Exception, e:
             LOGGER.exception('ERROR: Could not Connect to Cloud Service. Will Try again in 60 Seconds')
             time.sleep(60)
