@@ -39,7 +39,8 @@ class CloudPrintProxy(object):
         self.password = None
 
     def get_authh(self):
-        return 'GoogleLogin auth=%s' % self.get_auth()
+        #return 'GoogleLogin auth=%s' % self.get_auth()
+        return 'OAuth %s' % self.get_auth()
 
     def get_auth(self):
         if self.auth:
@@ -369,7 +370,8 @@ def wait_for_new_job(sasl_token):
                 assert not el.tag.endswith('failure') and not el.tag.endswith('error') and not el.get('type') == 'error', tostring(el)
                 return el
     msg('<stream to="gmail.com" version="1.0" xmlns="http://etherx.jabber.org/streams">')
-    msg('<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="X-GOOGLE-TOKEN">%s</auth>' % sasl_token)
+    #msg('<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="X-GOOGLE-TOKEN">%s</auth>' % sasl_token)
+    msg('<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="X-OAUTH2">%s</auth>' % sasl_token)
     msg('<s:stream to="gmail.com" version="1.0" xmlns:s="http://etherx.jabber.org/streams" xmlns="jabber:client">')
     iq = msg('<iq type="set"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><resource>Armooo</resource></bind></iq>')
     bare_jid = iq[0][0].text.split('/')[0]
